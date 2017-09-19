@@ -20,6 +20,7 @@ type HostID struct {
 // Get returns the host ID.
 func Get() (*HostID, error) {
 	var id HostID
+	var addrs []string
 	ifs, err := net.Interfaces()
 	if err != nil {
 		return nil, err
@@ -27,10 +28,20 @@ func Get() (*HostID, error) {
 	for _, v := range ifs {
 		h := v.HardwareAddr.String()
 		if len(h) > 0 {
-			id.HostID = append(id.HostID, h)
+			addrs = append(addrs, h)
 		}
 	}
-	sort.Strings(id.HostID) // sort host IDs
+	sort.Strings(addrs) // sort host IDs
+	if len(addrs) > 0 { // make host IDs unique
+		id.HostID = append(id.HostID, addrs[0])
+		last := addrs[0]
+		for i := 1; i < len(addrs); i++ {
+			if addrs[i] != last {
+				id.HostID = append(id.HostID, addrs[i])
+				last = addrs[i]
+			}
+		}
+	}
 	id.OS = runtime.GOOS
 	id.Arch = runtime.GOARCH
 	return &id, nil
