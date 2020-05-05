@@ -12,9 +12,42 @@ import (
 
 // HostID defines a host ID.
 type HostID struct {
-	HostID []string
-	OS     string
-	Arch   string
+	HostID []string `json:"hostid"`
+	OS     string   `json:"os"`
+	CPU    string   `json:"cpu"`
+}
+
+// GetOS returns the OS.
+func GetOS() string {
+	m := map[string]string{
+		"android": "Android",
+		"freebsd": "FreeBSD",
+		"linux":   "Linux",
+		// iOS is not supported by Go
+		"darwin":  "Mac OS",
+		"openbsd": "OpenBSD",
+		"windows": "Windows",
+	}
+	return m[runtime.GOOS]
+}
+
+// GetCPU returns the CPU architecture.
+func GetCPU() string {
+	m := map[string]string{
+		"amd64":   "x86_64",
+		"386":     "x86",
+		"arm64":   "aarch64",
+		"arm":     "arm",
+		"ppc64le": "powerpc64le",
+		"ppc64":   "powerpc64",
+		// powerpc32le is not supported by Go
+		"ppc":      "powerpc32",
+		"mipsle":   "mips32el",
+		"mips":     "mips32",
+		"mips64le": "mips64el",
+		"mips64":   "mips64",
+	}
+	return m[runtime.GOARCH]
 }
 
 // Get returns the host ID.
@@ -42,8 +75,8 @@ func Get() (*HostID, error) {
 			}
 		}
 	}
-	id.OS = runtime.GOOS
-	id.Arch = runtime.GOARCH
+	id.OS = GetOS()
+	id.CPU = GetCPU()
 	return &id, nil
 }
 
